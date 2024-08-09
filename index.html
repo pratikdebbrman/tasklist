@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.min.js"></script>
+  
+    <title>Map for Pune Location Prepeared for Geo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { 
+            height: 650px; 
+            position: relative; 
+        }
+        #filter {
+            position: absolute; 
+            top: 10px;
+            left: 60px; 
+            z-index: 1000; 
+            background-color: white; 
+            border: 1px solid #ddd; 
+            border-radius: 4px;
+            padding: 5px; 
+        }
+        
+        .center-horizontal {
+            width: 50%;
+            margin: 0 auto;
+            background-color: lightblue;
+        }
+        /* styles.css */
+        header {
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            height: 30px; 
+            background-color: #333; 
+            color: white;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        Prepared for Geo to show list of villages
+    </header>
+
+    <div id="map">
+        <select class="mdl-selectfield__select" id="filter">
+            <option value="">Select Villages near by Pune</option>          
+        </select>
+    </div>
+
+    <footer>
+        <p>Geopulse  Analytics Pvt. Ltd &copy; 2024. All rights reserved.</p>
+    </footer>
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the map
+            var map = L.map('map').setView([19.078, 73.595], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; Prepeared for GeoPlus'
+            }).addTo(map);
+
+            // Fetch village data
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    var listOfVillages = data.features;
+                    var select = document.getElementById('filter');
+                    
+                    // Populating  dropdown
+                    listOfVillages.forEach(eachvillage => {
+                        var option = document.createElement('option');
+                        option.value = eachvillage.properties.Village;
+                        option.textContent = eachvillage.properties.Village;
+                        select.appendChild(option);
+                    });
+
+                    // Adding event listener to filter
+                    select.addEventListener('change', function() {
+                        var villageSelcted = this.value;
+                        var eachvillage = listOfVillages.find(v => v.properties.Village === villageSelcted);
+
+                        if (eachvillage) {
+                            var bounds = L.geoJSON(eachvillage.geometry).getBounds();
+                            map.fitBounds(bounds);
+                        }
+                    });
+                });
+        });
+    </script>
+</body>
+</html>
